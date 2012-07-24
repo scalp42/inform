@@ -55,15 +55,20 @@ MET_CODES = {
 class InformPlugin(InformBasePlugin):
 
     def process(self):
-        data = {
-            'mel-latest': self.boml(),
-            'mel-forecast': self.bomf(),
-            'bri-latest': self.metl(),
-            'bri-forecast': self.metf(),
-            'mel-astro': self.astro(),
-        }
-        self.store(__name__, data)
-        return data
+        try:
+            data = {
+                'mel-latest': self.boml(),
+                'mel-forecast': self.bomf(),
+                'bri-latest': self.metl(),
+                'bri-forecast': self.metf(),
+                'mel-astro': self.astro(),
+            }
+            self.store(__name__, data)
+
+        except:
+            return False
+
+        return True
 
 
     def boml(self):

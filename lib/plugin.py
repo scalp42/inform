@@ -1,16 +1,21 @@
-from celery.task import PeriodicTask
-from datetime import timedelta
+from celery.task import Task
+
+from datetime import datetime, timedelta
 
 from lib.memcache_wrapper import cache
 
 from abc import abstractmethod
 
 
-class InformBasePlugin(PeriodicTask):
+class InformBasePlugin(Task):
     run_every = timedelta(minutes=30)
 
-    def run(self, **kwargs):
+    def __call__(self, *args, **kwargs):
         self.process()
+        return ""
+
+    def after_return(self, status, retval, task_id, args, kwargs, einfo):
+        pass
 
     def load(self, key):
         return cache.get(key)

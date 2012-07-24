@@ -234,7 +234,7 @@ class InformPlugin(InformBasePlugin):
                     })
 
         except (xmlrpclib.Fault, SocketError) as e:
-            return {}
+            return False
 
         self.store(__name__, data)
-        return data
+        return True

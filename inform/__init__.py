@@ -27,6 +27,8 @@ for root, dirs, files in os.walk('inform/plugins'):
                 print "Bad plugin: %s" % modname
                 pass
 
+from inform import scheduler
+
 
 if __name__ == '__main__':
     app.run()

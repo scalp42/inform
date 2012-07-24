@@ -54,8 +54,10 @@ class InformPlugin(InformBasePlugin):
                     })
 
             self.store(__name__, data)
-            return data
+            return True
 
+        except:
+            return False
         finally:
             driver.close()
 
