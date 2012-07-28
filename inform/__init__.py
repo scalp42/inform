@@ -1,10 +1,15 @@
 # setup Celery
-from inform.celery import celery
+import inform.celery
 
 # setup Flask
 from flask import Flask
 app = Flask(__name__)
 app.config.from_pyfile("../config/flask.conf.py")
+
+
+# create the storage class
+from storage import Storage
+storage = Storage()
 
 
 # find and import all plugins
@@ -19,8 +24,9 @@ for root, dirs, files in os.walk('inform/plugins'):
             modname = filename[:-3]
 
             try:
-                mod = __import__("plugins.%s" % modname, globals(), locals(), ['InformPlugin'], -1)
-                modules[modname] = mod.InformPlugin()
+                mod = __import__("plugins.%s" % modname, globals(), locals(), [''], -1)
+                #modules[modname] = mod.InformPlugin()
+                modules[modname] = mod.eggsbacon
                 print "Loaded plugin: %s" % modname
 
             except (ImportError, AttributeError):

@@ -1,10 +1,11 @@
-from lib.plugin import InformBasePlugin
+from __future__ import absolute_import
 
-from celery.task import task
+from celery import task
 
 from datetime import timedelta
 
 import requests
+from requests import ConnectionError
 import json
 
 
@@ -16,15 +17,21 @@ PARAMS = {
 }
 
 
-class InformPlugin(InformBasePlugin):
-    run_every = timedelta(minutes=1)
-
-    def process(self):
+@task()
+def eggsbacon():
+#class InformPlugin(InformBasePlugin):
+#    def process(self):
+    print 'eggsbacon'
+    try:
         r = requests.post(URL, data=PARAMS)
-        trams = json.loads(r.text)
-        data = {
-            'first': trams['TramTrackerResponse']['ArrivalsPages'][0][0]['Arrival'],
-            'second': trams['TramTrackerResponse']['ArrivalsPages'][0][1]['Arrival'],
-        }
+    except ConnectionError:
+        raise Exception("HTTP Connection failed to %s" % URL)
 
-        self.store(__name__, data)
+    trams = json.loads(r.text)
+    data = {
+        'first': trams['TramTrackerResponse']['ArrivalsPages'][0][0]['Arrival'],
+        'second': trams['TramTrackerResponse']['ArrivalsPages'][0][1]['Arrival'],
+    }
+    return data
+
+

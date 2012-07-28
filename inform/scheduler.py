@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
 from celery.task import periodic_task
-from celery.result import AsyncResult
 
 from inform import modules
+from inform.storage import store
 
 from datetime import datetime, timedelta
 
@@ -12,7 +12,7 @@ run_state = {}
 for name in modules.keys():
     run_state[name] = {
         'last_run': None,
-        'success_count': 0,
+        'next_run': datetime.now(),
         'fail_count': 0,
         'last_task_result': None,
     }
@@ -24,27 +24,26 @@ def scheduler():
         if name == "tramtracker":
             # check result of last run
             result = run_state[name]['last_task_result']
-            if result is None:
-                run(name)
-            elif result.successful():
-                run_state[name]['success_count'] += 1
+
+            if result is not None and result.successful():
                 run_state[name]['fail_count'] = 0
-                run(name)
-            elif result.failed():
+                run_state[name]['next_run'] = datetime.now()
+            
+            elif result is not None and result.failed():
                 run_state[name]['fail_count'] += 1
-                run_state[name]['success_count'] = 0
-                run(name)
+                run_state[name]['next_run'] = datetime.now() + timedelta(minutes=run_state[name]['fail_count'])
 
-            # if now() > fail_count * mins since last_run
+            run_module(name)
 
-            print run_state[name]['last_task_result']
 
-    # record last run time and task_id
-    # on next run, check the result and decide to run again or not..
-    # range between every 1 min, to every 1 hour
+def run_module(name):
+    print run_state[name]['next_run']
 
-def run(module_name):
-    run_state[module_name]['last_run'] = datetime.now()
-    run_state[module_name]['last_task_result'] = modules[module_name].delay()
+    if datetime.now() >= run_state[name]['next_run']:
+        run_state[name]['last_run'] = datetime.now()
+        module_task = modules[name].subtask()
+        run_state[name]['last_task_result'] = modules[name].delay(link=store.s(name))
+    else:
+        run_state[name]['last_task_result'] = None
 
 

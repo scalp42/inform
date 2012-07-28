@@ -1,4 +1,4 @@
-from celery.task import Task
+from celery import Task
 
 from datetime import datetime, timedelta
 
@@ -8,14 +8,17 @@ from abc import abstractmethod
 
 
 class InformBasePlugin(Task):
-    run_every = timedelta(minutes=30)
+    abstract = True
 
     def __call__(self, *args, **kwargs):
         self.process()
         return ""
 
-    def after_return(self, status, retval, task_id, args, kwargs, einfo):
-        pass
+    def on_failure(self, retval, task_id, args, kwargs, einfo):
+        print 'EGGGGGGG failure'
+
+    def on_success(self, retval, task_id, args, kwargs):
+        print 'EGGGGGGG success'
 
     def load(self, key):
         return cache.get(key)
@@ -27,3 +30,13 @@ class InformBasePlugin(Task):
     @abstractmethod
     def process(self):
         pass
+
+
+class InformBasePlugin2(Task):
+    abstract = True
+
+    def __call__(self, *args, **kwargs):
+        print '__call__'
+        return self.run(*args, **kwargs)
+
+
