@@ -13,13 +13,13 @@ modules = {}
 import os
 import views
 
-for root, dirs, files in os.walk('inform/plugins'):
+for root, dirs, files in os.walk('inform/plugins_active'):
     for filename in files:
         if not filename.startswith("__") and filename.endswith('.py'):
             modname = filename[:-3]
 
             try:
-                mod = __import__("plugins.%s" % modname, globals(), locals(), ['InformPlugin'], -1)
+                mod = __import__("plugins_active.%s" % modname, globals(), locals(), ['InformPlugin'], -1)
                 modules[modname] = mod.InformPlugin()
                 print "Loaded plugin: %s" % modname
 
